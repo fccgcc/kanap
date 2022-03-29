@@ -1,16 +1,9 @@
-const items = { ...localStorage };
-// allitems[]
+items = { ...localStorage };
 keys = Object.keys(items)
-
-totalCartPrice = 0
-totalCartQuantity = 0
+numberOfKeys =  keys.length
 
 totalPriceElement    = document.getElementById("totalPrice")
-
 totalQuantityElement = document.getElementById("totalQuantity")
-//totalQuantityElement.innerHTML
-numberOfKeys =  keys.length
-counter = 0
 
 function modifyItemById(HTMLelementID, InnerHTMLcontent)
 {
@@ -18,8 +11,15 @@ function modifyItemById(HTMLelementID, InnerHTMLcontent)
     hmtlElement.innerHTML = InnerHTMLcontent
 }
 
-function setTotals(totalPriceElement,totalQuantityElement){ 
-    console.log(totalCartPrice)
+async function setTotals(){
+    totals = await getTotals()
+    totalPriceElement    = document.getElementById("totalPrice")
+    totalQuantityElement = document.getElementById("totalQuantity")
+
+    totalCartPrice = totals.totalCartPrice;
+    totalCartQuantity = totals.totalCartQuantity 
+
+    console.log("totalCartPrice : " +  totalCartPrice, "totalCartQuantity : " + totalCartQuantity)
     totalPriceElement.innerHTML = totalCartPrice;
     totalQuantityElement.innerHTML = totalCartQuantity 
 }
@@ -28,12 +28,17 @@ async function getTotals()
 {
     totalCartQuantity = 0
     totalCartPrice = 0
-    for (let i = 0 ; i < keys.length;  i++) 
+    
+    items = { ...localStorage };
+    keys = Object.keys(items)
+    numberOfKeys =  keys.length
+
+    for (let i = 0 ; i < numberOfKeys ;  i++) 
     {
         parsed = JSON.parse(items[keys[i]])
         
         itemInfo = await getProductData(parsed.id)
-        
+
         price = itemInfo.price
         itemQuantity = parsed.itemQuantity
 
@@ -132,7 +137,7 @@ async function needAsync()
         inputQuantity.setAttribute("value", parsed.itemQuantity)
         inputQuantity.className = "itemQuantity"
 
-        inputQuantity.addEventListener('change',  async function(e)  {
+        inputQuantity.addEventListener('change',  function(e)  {
             
             article = e.target.closest("article") 
             itemKey = article.dataset.name + "-" + article.dataset.color
@@ -142,12 +147,13 @@ async function needAsync()
     
             localStorage.setItem(itemKey,JSON.stringify(itemInStorage))
             console.log("called")
-            totalsCart = await getTotals()
+            setTotals()
             console.log("called")
-
-            totalPriceElement.innerHTML = totalsCart.totalCartPrice
-            console.log(totalsCart.totalCartPrice)
-            totalQuantityElement.innerHTML = totalsCart.totalCartQuantity
+            // totalsCart = await getTotals()
+            // console.log("called")
+            // totalPriceElement.innerHTML = totalsCart.totalCartPrice
+            // console.log(totalsCart.totalCartPrice)
+            // totalQuantityElement.innerHTML = totalsCart.totalCartQuantity
         })
 
         cartItemContentSettingsQuantity.appendChild(quantitytext)
@@ -171,21 +177,13 @@ async function needAsync()
         imageContentDescriptionContainer__h2.innerHTML  =   product.name
         imageContentDescriptionContainer__p_1.innerHTML =   parsed.color
         imageContentDescriptionContainer__p_2.innerHTML =   Number(product.price) + " €"
-        totalsCart = await getTotals()
-        totalCartQuantity = totalsCart.totalCartQuantity
-        totalCartPrice = totalsCart.totalCartPrice
+        setTotals()
     }
 }
 
 needAsync()
-
+//setTotals()
 // setTotals(totalPriceElement,totalQuantityElement)
-
-setTimeout(function(){ 
-    console.log(totalCartPrice)
-    totalPriceElement.innerHTML = totalCartPrice;
-    totalQuantityElement.innerHTML = totalCartQuantity }
-    , 500);
 
 
 // console.log(keys)
